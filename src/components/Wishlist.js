@@ -136,7 +136,7 @@ const Wishlist = ({ wishlistItems, onClose, onRemoveFromWishlist, onAddToCart })
                       color: '#667eea',
                       marginBottom: '12px'
                     }}>
-                      ${bike.price}
+                      ₹{bike.price}
                     </p>
                     <button
                       onClick={() => {

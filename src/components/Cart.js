@@ -196,7 +196,7 @@ const Cart = ({ cartItems, onRemoveFromCart, onUpdateQuantity, onClose, onProcee
                         backgroundClip: 'text',
                         marginBottom: '8px'
                       }}>
-                        ${item.price * item.quantity}
+                        ₹{item.price * item.quantity}
                       </p>
                       <button
                         onClick={() => onRemoveFromCart(item.id)}
@@ -244,7 +244,7 @@ const Cart = ({ cartItems, onRemoveFromCart, onUpdateQuantity, onClose, onProcee
                     WebkitTextFillColor: 'transparent',
                     backgroundClip: 'text'
                   }}>
-                    ${total.toFixed(2)}
+                    ₹{total.toFixed(2)}
                   </span>
                 </div>
                 <button

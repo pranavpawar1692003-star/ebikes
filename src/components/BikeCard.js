@@ -85,7 +85,7 @@ const BikeCard = ({ bike, onAddToCart, onViewDetails, onToggleWishlist, isInWish
             color: '#a78bfa',
             letterSpacing: '-0.02em'
           }}>
-            ${bike.price}
+            ₹{bike.price}
           </div>
         </div>
         <p style={{
@@ -176,7 +176,7 @@ const BikeCard = ({ bike, onAddToCart, onViewDetails, onToggleWishlist, isInWish
               fontWeight: '600',
               fontSize: '0.9rem',
               transition: 'all 0.2s ease',
-              boxShadow: '0 0 15px rgba(139, 92, 246, 0.3)'
+              boxShadow: '0 0 15px rgba(233, 232, 236, 0.3)'
             }}
             onMouseOver={(e) => {
               e.currentTarget.style.transform = 'translateY(-2px)';

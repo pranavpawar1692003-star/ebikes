@@ -105,7 +105,7 @@ const BikeDetails = ({ bike, onClose, onAddToCart }) => {
               border: '1px solid rgba(139, 92, 246, 0.3)'
             }}>
               <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '6px', fontWeight: '500' }}>Price</p>
-              <p style={{ fontSize: 'clamp(1.6rem, 4vw, 2rem)', fontWeight: '700', color: '#a78bfa' }}>${bike.price}</p>
+              <p style={{ fontSize: 'clamp(1.6rem, 4vw, 2rem)', fontWeight: '700', color: '#a78bfa' }}>₹{bike.price}</p>
             </div>
             <div style={{
               background: 'rgba(99, 102, 241, 0.15)',

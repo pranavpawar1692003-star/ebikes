@@ -1,34 +1,98 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { saveRideToFirebase, getRidesFromFirebase } from '../services/rideService';
 
 const Dashboard = ({ onClose }) => {
     const [timeRange, setTimeRange] = useState('weekly');
+    const [rides, setRides] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [simulating, setSimulating] = useState(false);
+
+    useEffect(() => {
+        fetchRides();
+    }, []);
+
+    const fetchRides = async () => {
+        setLoading(true);
+        const result = await getRidesFromFirebase();
+        if (result.success) {
+            setRides(result.rides);
+        }
+        setLoading(false);
+    };
+
+    const handleSimulateRide = async () => {
+        setSimulating(true);
+        // Simulate a ride between 2km and 20km
+        const distance = Math.floor(Math.random() * 18) + 2;
+        const rideData = {
+            distance: distance,
+            duration: distance * 3, // roughly 3 mins per km
+            date: new Date().toISOString()
+        };
+
+        const result = await saveRideToFirebase(rideData);
+        if (result.success) {
+            await fetchRides();
+        }
+        setSimulating(false);
+    };
+
+    // Calculate Stats
+    const totalDistance = rides.reduce((acc, ride) => acc + ride.distance, 0);
+    const moneySaved = (totalDistance * 5).toFixed(0); // ₹5 saved per km
+    const co2Saved = (totalDistance * 0.2).toFixed(1); // 0.2kg CO2 per km
+    const totalRides = rides.length;
 
     const stats = [
-        { label: 'Total Distance', value: '2,450 km', icon: '🚲', color: 'from-blue-500 to-cyan-400' },
-        { label: 'Money Saved', value: '$320.50', icon: '💰', color: 'from-emerald-500 to-green-400' },
-        { label: 'CO₂ Saved', value: '150 kg', icon: '🌱', color: 'from-green-500 to-teal-400' },
-        { label: 'Total Rides', value: '42', icon: '🗺️', color: 'from-purple-500 to-pink-400' },
+        { label: 'Total Distance', value: `${totalDistance} km`, icon: '🚲', color: 'from-blue-500 to-cyan-400' },
+        { label: 'Money Saved', value: `₹${moneySaved}`, icon: '💰', color: 'from-emerald-500 to-green-400' },
+        { label: 'CO₂ Saved', value: `${co2Saved} kg`, icon: '🌱', color: 'from-green-500 to-teal-400' },
+        { label: 'Total Rides', value: totalRides.toString(), icon: '🗺️', color: 'from-purple-500 to-pink-400' },
     ];
 
-    const weeklyData = [
-        { day: 'Mon', dist: 12 },
-        { day: 'Tue', dist: 18 },
-        { day: 'Wed', dist: 0 },
-        { day: 'Thu', dist: 22 },
-        { day: 'Fri', dist: 15 },
-        { day: 'Sat', dist: 45 },
-        { day: 'Sun', dist: 30 },
-    ];
+    // Process Chart Data
+    const getChartData = () => {
+        if (timeRange === 'weekly') {
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const last7Days = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                last7Days.push(d);
+            }
 
-    const monthlyData = [
-        { day: 'Week 1', dist: 85 },
-        { day: 'Week 2', dist: 120 },
-        { day: 'Week 3', dist: 95 },
-        { day: 'Week 4', dist: 140 },
-    ];
+            return last7Days.map(date => {
+                const dayStr = days[date.getDay()];
+                const dayRides = rides.filter(ride => {
+                    const rideDate = new Date(ride.createdAt || ride.date);
+                    return rideDate.getDate() === date.getDate() &&
+                        rideDate.getMonth() === date.getMonth() &&
+                        rideDate.getFullYear() === date.getFullYear();
+                });
+                return {
+                    day: dayStr,
+                    dist: dayRides.reduce((acc, ride) => acc + ride.distance, 0)
+                };
+            });
+        } else {
+            // Monthly - show last 4 weeks
+            const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+            // This is a simplified 4-week view, ideally would bucket by actual weeks
+            // For now, let's just show dummy distribution if no data, or bucket existing data
+            if (rides.length === 0) return weeks.map(w => ({ day: w, dist: 0 }));
 
-    const data = timeRange === 'weekly' ? weeklyData : monthlyData;
-    const maxDist = Math.max(...data.map(d => d.dist));
+            // Simple bucketing for demo purposes
+            return weeks.map((w, i) => ({
+                day: w,
+                dist: rides
+                    .filter((_, idx) => idx % 4 === i) // Distribute pseudo-randomly for visual if just a few rides
+                    .reduce((acc, ride) => acc + ride.distance, 0)
+            }));
+        }
+    };
+
+    const data = getChartData();
+    const maxDist = Math.max(...data.map(d => d.dist), 10); // Minimum scale of 10
 
     return (
         <div style={{
@@ -65,16 +129,38 @@ const Dashboard = ({ onClose }) => {
                     justifyContent: 'space-between',
                     alignItems: 'center'
                 }}>
-                    <h2 style={{
-                        fontSize: '1.8rem',
-                        fontWeight: '700',
-                        background: 'linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        margin: 0
-                    }}>
-                        Rider Dashboard
-                    </h2>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                        <h2 style={{
+                            fontSize: '1.8rem',
+                            fontWeight: '700',
+                            background: 'linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            margin: 0
+                        }}>
+                            Rider Dashboard
+                        </h2>
+                        <button
+                            onClick={handleSimulateRide}
+                            disabled={simulating}
+                            style={{
+                                padding: '8px 16px',
+                                background: simulating ? 'rgba(56, 189, 248, 0.1)' : 'rgba(56, 189, 248, 0.2)',
+                                border: '1px solid rgba(56, 189, 248, 0.3)',
+                                borderRadius: '8px',
+                                color: '#38bdf8',
+                                cursor: simulating ? 'wait' : 'pointer',
+                                fontSize: '0.9rem',
+                                fontWeight: '600',
+                                transition: 'all 0.2s ease',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px'
+                            }}
+                        >
+                            {simulating ? 'Simulating...' : '🚲 Simulate Ride'}
+                        </button>
+                    </div>
                     <button
                         onClick={onClose}
                         style={{
@@ -207,51 +293,65 @@ const Dashboard = ({ onClose }) => {
                             gap: '20px',
                             paddingTop: '40px'
                         }}>
-                            {data.map((item, index) => (
-                                <div key={index} style={{
-                                    flex: 1,
+                            {loading ? (
+                                <div style={{
+                                    width: '100%',
+                                    height: '100%',
                                     display: 'flex',
-                                    flexDirection: 'column',
                                     alignItems: 'center',
-                                    gap: '12px',
-                                    height: '100%'
+                                    justifyContent: 'center',
+                                    color: '#94a3b8'
                                 }}>
-                                    <div style={{
-                                        width: '100%',
-                                        height: '100%',
+                                    Loading analytics...
+                                </div>
+                            ) : (
+                                data.map((item, index) => (
+                                    <div key={index} style={{
+                                        flex: 1,
                                         display: 'flex',
-                                        alignItems: 'flex-end',
-                                        borderRadius: '12px 12px 0 0',
-                                        columnCount: 1,
-                                        position: 'relative' // For tooltip
-                                    }}
-                                        className="bar-container"
-                                    >
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        height: '100%'
+                                    }}>
                                         <div style={{
                                             width: '100%',
-                                            height: `${(item.dist / maxDist) * 100}%`,
-                                            background: 'linear-gradient(180deg, #38bdf8 0%, #3b82f6 100%)',
-                                            borderRadius: '8px 8px 0 0',
-                                            opacity: 0.8,
-                                            transition: 'height 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                                            position: 'relative'
-                                        }}>
+                                            height: '100%',
+                                            display: 'flex',
+                                            alignItems: 'flex-end',
+                                            borderRadius: '12px 12px 0 0',
+                                            columnCount: 1,
+                                            position: 'relative' // For tooltip
+                                        }}
+                                            className="bar-container"
+                                        >
                                             <div style={{
-                                                position: 'absolute',
-                                                top: '-25px',
-                                                left: '50%',
-                                                transform: 'translateX(-50%)',
-                                                color: '#94a3b8',
-                                                fontSize: '0.8rem',
-                                                fontWeight: '600'
+                                                width: '100%',
+                                                height: `${Math.max((item.dist / maxDist) * 100, 2)}%`, // Minimum height for visibility
+                                                background: 'linear-gradient(180deg, #38bdf8 0%, #3b82f6 100%)',
+                                                borderRadius: '8px 8px 0 0',
+                                                opacity: 0.8,
+                                                transition: 'height 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                                                position: 'relative'
                                             }}>
-                                                {item.dist}km
+                                                <div style={{
+                                                    position: 'absolute',
+                                                    top: '-25px',
+                                                    left: '50%',
+                                                    transform: 'translateX(-50%)',
+                                                    color: '#94a3b8',
+                                                    fontSize: '0.8rem',
+                                                    fontWeight: '600',
+                                                    whiteSpace: 'nowrap'
+                                                }}>
+                                                    {item.dist > 0 ? `${item.dist}km` : ''}
+                                                </div>
                                             </div>
                                         </div>
+                                        <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>{item.day}</span>
                                     </div>
-                                    <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>{item.day}</span>
-                                </div>
-                            ))}
+                                ))
+                            )}
                         </div>
                     </div>
                 </div>

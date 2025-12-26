@@ -127,22 +127,22 @@ const Checkout = ({ cartItems, onClose, onConfirmOrder }) => {
                       <p style={{ fontSize: '0.9rem', color: '#718096' }}>Qty: {item.quantity}</p>
                     </div>
                     <p style={{ fontWeight: 'bold', color: '#667eea' }}>
-                      ${item.price * item.quantity}
+                      ₹{item.price * item.quantity}
                     </p>
                   </div>
                 ))}
                 <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '2px solid #cbd5e0' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <span style={{ color: '#718096' }}>Subtotal:</span>
-                    <span style={{ fontWeight: '600' }}>${total.toFixed(2)}</span>
+                    <span style={{ fontWeight: '600' }}>₹{total.toFixed(2)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <span style={{ color: '#718096' }}>Tax (10%):</span>
-                    <span style={{ fontWeight: '600' }}>${tax.toFixed(2)}</span>
+                    <span style={{ fontWeight: '600' }}>₹{tax.toFixed(2)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
                     <span style={{ color: '#718096' }}>Shipping:</span>
-                    <span style={{ fontWeight: '600' }}>${shipping.toFixed(2)}</span>
+                    <span style={{ fontWeight: '600' }}>₹{shipping.toFixed(2)}</span>
                   </div>
                   <div style={{
                     display: 'flex',
@@ -159,7 +159,7 @@ const Checkout = ({ cartItems, onClose, onConfirmOrder }) => {
                       WebkitTextFillColor: 'transparent',
                       backgroundClip: 'text'
                     }}>
-                      ${grandTotal.toFixed(2)}
+                      ₹{grandTotal.toFixed(2)}
                     </span>
                   </div>
                 </div>
