@@ -1,3 +1,37 @@
+# E-Bike Store - Robots.txt
 # https://www.robotstxt.org/robotstxt.html
+
+# Allow all search engines to crawl the entire site
 User-agent: *
-Disallow:
+Allow: /
+
+# Disallow crawling of specific paths (if needed in future)
+# Disallow: /admin/
+# Disallow: /api/
+# Disallow: /private/
+
+# Crawl-delay (optional - helps prevent server overload)
+# Crawl-delay: 1
+
+# Sitemap location (update with your actual domain when deployed)
+# Sitemap: https://yourdomain.com/sitemap.xml
+
+# Specific rules for major search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Block bad bots (optional)
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
