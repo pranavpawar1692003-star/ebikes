@@ -190,7 +190,7 @@ const OrderConfirmation = ({ orderDetails, onClose }) => {
               </div>
             </div>
           ))}
-
+ 
           <div style={{
             marginTop: '20px',
             paddingTop: '20px',

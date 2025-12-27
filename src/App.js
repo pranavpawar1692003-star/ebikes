@@ -60,10 +60,21 @@ function App() {
   }, []);
 
   const filteredBikes = bikes.filter(bike => {
-    const matchesSearch = bike.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    return bike.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       bike.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = selectedFilter === 'all' || bike.category === selectedFilter;
-    return matchesSearch && matchesFilter;
+  }).sort((a, b) => {
+    switch (selectedFilter) {
+      case 'price-low':
+        return a.price - b.price;
+      case 'price-high':
+        return b.price - a.price;
+      case 'range-high':
+        return b.range - a.range;
+      case 'speed-high':
+        return b.maxSpeed - a.maxSpeed;
+      default:
+        return 0;
+    }
   });
 
   const handleAddToCart = (bike) => {
