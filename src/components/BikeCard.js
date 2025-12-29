@@ -192,7 +192,7 @@ const BikeCard = ({ bike, onAddToCart, onViewDetails, onToggleWishlist, isInWish
                 </div>
             </div>
         </div>
-    ); 
+    );
 };
 
 export default BikeCard;
